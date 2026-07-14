@@ -1,0 +1,29 @@
+name: Import web content
+
+on:
+  push:
+    paths:
+      - '.github/workflows/import-web-content.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Import website snapshot
+        run: |
+          set -euo pipefail
+          git clone --depth 1 https://github.com/anxiannet/realmruckus.git /tmp/source
+          cp '/tmp/source/index.html' './index.html'
+          mkdir -p assets/visual-anchor
+          cp '/tmp/source/assets/visual-anchor/realm-ruckus-visual-anchor-v1.png' 'assets/visual-anchor/realm-ruckus-visual-anchor-v1.png'
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html assets/visual-anchor/realm-ruckus-visual-anchor-v1.png
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'migrate: import standalone website snapshot'
+          git push origin HEAD:main
