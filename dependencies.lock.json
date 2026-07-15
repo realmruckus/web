@@ -5,19 +5,19 @@
     {
       "repository": "realmruckus/core",
       "tag": null,
-      "commit_sha": "3aefff10249d8f9f98d145118cdc20c33e91bf3f",
-      "purpose": "authoritative shared rules and mechanism data"
+      "commit_sha": "cbe6940fafd7f8a88e4d55bf81708e59503caa9b",
+      "purpose": "authoritative shared rules, mechanism data and product metadata"
     },
     {
       "repository": "realmruckus/classic",
       "tag": null,
-      "commit_sha": "9b9b6ac1ceeb6a95177944bc8d4592d27da6f8f1",
-      "purpose": "Realm Ruckus English theme content and assets"
+      "commit_sha": "84085d29f5ee76f18529c17f83a1bee75574844a",
+      "purpose": "Realm Ruckus English theme content, assets and visual freeze definitions"
     }
   ],
   "source_snapshot": {
     "repository": "anxiannet/realmruckus",
     "commit_sha": "1773d97d2da2c6bdc467bf5f3a97eefe7965d386"
   },
-  "note": "No formal release tags existed at migration time; fixed commit SHAs are authoritative until explicit tagged releases are adopted."
+  "note": "Product identity is rendered from core/docs/product-metadata.md at the pinned Core commit. No dependency follows main implicitly; upgrades require an explicit lock update and Web commit."
 }
