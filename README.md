@@ -11,7 +11,7 @@ dependencies.lock.json
 docs/migration/
 ```
 
-The migrated source is a static landing-page snapshot. The reviewed source did not contain a package manifest, build system, deployment configuration, web test suite or content synchronization program. Those capabilities must not be described as already migrated.
+The migrated source is a static landing-page snapshot. The reviewed source did not contain a package manifest, build system, deployment configuration, web test suite or automatic content synchronization program. Those capabilities must not be described as already migrated.
 
 ## Authority
 
@@ -25,8 +25,17 @@ Web owns:
 Web does not own:
 
 - shared rules, mechanism data, engine, AI, simulation or baselines;
+- product-wide identity metadata;
 - reusable physical-production specifications or tools;
 - the authoritative Realm Ruckus theme document and asset library.
+
+Product name, publisher, copyright owner, registered country, trademark output and official website are sourced from the pinned Core version of:
+
+```text
+docs/product-metadata.md
+```
+
+The current static footer renders the approved full copyright output from that pinned metadata. Any metadata change requires an explicit Core dependency-lock update and a Web commit; Core changes do not deploy this repository automatically.
 
 ## Dependency and deployment rule
 
