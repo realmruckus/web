@@ -20,6 +20,7 @@ Tracked files at audit time:
 README.md
 assets/visual-anchor/realm-ruckus-visual-anchor-v1.png
 dependencies.lock.json
+docs/migration/web-migration-audit-2026-07-15.md
 docs/migration/web-source-audit-2026-07-15.md
 index.html
 ```
