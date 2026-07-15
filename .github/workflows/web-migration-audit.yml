@@ -1,0 +1,124 @@
+name: Web migration audit
+
+on:
+  push:
+    paths:
+      - '.github/workflows/web-migration-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Validate repository structure
+        run: |
+          set -euo pipefail
+          test -f README.md
+          test -f index.html
+          test -f dependencies.lock.json
+          test -f docs/migration/web-source-audit-2026-07-15.md
+          test -f assets/visual-anchor/realm-ruckus-visual-anchor-v1.png
+          test ! -d engine
+          test ! -d simulation
+          test ! -d tests
+          test ! -d data
+
+      - name: Validate dependency lock
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          data = json.loads(Path('dependencies.lock.json').read_text(encoding='utf-8'))
+          deps = {item['repository']: item for item in data['dependencies']}
+          assert deps['realmruckus/core']['commit_sha'] == '3aefff10249d8f9f98d145118cdc20c33e91bf3f'
+          assert deps['realmruckus/classic']['commit_sha'] == '9b9b6ac1ceeb6a95177944bc8d4592d27da6f8f1'
+          assert data['source_snapshot']['commit_sha'] == '1773d97d2da2c6bdc467bf5f3a97eefe7965d386'
+          print('Dependency lock is valid.')
+          PY
+
+      - name: Validate static page references
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          html = Path('index.html').read_text(encoding='utf-8')
+          refs = re.findall(r'(?:src|href)=["\']([^"\']+)["\']', html)
+          local = []
+          for ref in refs:
+              if ref.startswith(('http://', 'https://', 'mailto:', '#')):
+                  continue
+              path = Path(ref.lstrip('/'))
+              local.append(path)
+              assert path.exists(), f'Missing local reference: {ref}'
+          assert Path('assets/visual-anchor/realm-ruckus-visual-anchor-v1.png') in local
+          print('All local HTML references resolve.')
+          PY
+
+      - name: Smoke test static serving
+        run: |
+          set -euo pipefail
+          python -m http.server 8080 >/tmp/web-server.log 2>&1 &
+          server_pid=$!
+          trap 'kill $server_pid' EXIT
+          sleep 2
+          curl --fail --silent --show-error http://127.0.0.1:8080/index.html >/tmp/index.html
+          curl --fail --silent --show-error http://127.0.0.1:8080/assets/visual-anchor/realm-ruckus-visual-anchor-v1.png >/tmp/visual-anchor.png
+          test -s /tmp/index.html
+          test -s /tmp/visual-anchor.png
+
+      - name: Record inventory and hashes
+        run: |
+          git ls-files > /tmp/web-files.txt
+          sha256sum README.md index.html dependencies.lock.json docs/migration/web-source-audit-2026-07-15.md assets/visual-anchor/realm-ruckus-visual-anchor-v1.png > /tmp/web-sha256.txt
+          cat /tmp/web-files.txt
+          cat /tmp/web-sha256.txt
+
+      - name: Commit successful audit record
+        run: |
+          set -euo pipefail
+          mkdir -p docs/migration
+          {
+            echo '# Web migration audit'
+            echo
+            echo 'Date: 2026-07-15'
+            echo
+            echo 'Result: PASS'
+            echo
+            echo 'Validated:'
+            echo
+            echo '- required static website files and migration records exist;'
+            echo '- dependency lock contains the expected fixed Core and Classic commits;'
+            echo '- no Core engine, simulator, tests or rule data are present;'
+            echo '- all local HTML references resolve;'
+            echo '- the page and visual asset are served successfully by a local static HTTP server;'
+            echo '- no claim is made that an external deployment platform is configured or tested.'
+            echo
+            echo 'Tracked files at audit time:'
+            echo
+            echo '```text'
+            cat /tmp/web-files.txt
+            echo '```'
+            echo
+            echo 'SHA-256:'
+            echo
+            echo '```text'
+            cat /tmp/web-sha256.txt
+            echo '```'
+          } > docs/migration/web-migration-audit-2026-07-15.md
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/migration/web-migration-audit-2026-07-15.md
+          if git diff --cached --quiet; then
+            echo 'Audit record already current.'
+            exit 0
+          fi
+          git commit -m 'audit: record successful web migration verification'
+          git push
