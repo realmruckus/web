@@ -25,13 +25,22 @@ docs/research/online-mode-architecture-reference.md
 
 ### 2. WORLD 持续多人卡牌 RPG 游戏模式
 
-正式设计参考位于 Core：
+正式设计参考位于 Core 独立目录：
 
 ```text
-realmruckus/core/docs/research/world-persistent-card-rpg-mode-reference.md
+realmruckus/core/docs/research/world/
 ```
 
-该文档描述持续角色、等级、金币、装备、个人卡组、行动力、专业成长、区域资源、Boss、公会与区域竞争等游戏机制。玩家通过狩猎、采集、探索、攻击、建设等卡牌行动与持续世界交互。
+当前包括：
+
+```text
+overview.md
+asynchronous-territory-conflict.md
+```
+
+`overview.md` 描述持续角色、等级、金币、装备、个人卡组、行动力、专业成长、区域资源、Boss、公会与区域竞争等游戏机制。玩家通过狩猎、采集、探索、攻击、建设等卡牌行动与持续世界交互。
+
+`asynchronous-territory-conflict.md` 记录按个人进度展开时的临时占领、时间线汇合、异步夺取与历史收益不回滚机制建议。
 
 它回答的是：
 
